@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>音符播放器</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
+    .controls {
+      margin-bottom: 20px;
+    }
+    .note-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .note-buttons button {
+      width: 60px;
+      height: 60px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      transition: background-color 0.3s;
+    }
+    .note-buttons button:hover {
+      background-color: #45a049;
+    }
+    button#start, button#end {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 5px;
+      border-radius: 8px;
+      border: none;
+    }
+    button#start {
+      background-color: #2196F3;
+    }
+    button#start:hover {
+      background-color: #1976D2;
+    }
+    button#end {
+      background-color: #f44336;
+    }
+    button#end:hover {
+      background-color: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+  <h1>音符播放器</h1>
+  <div class="controls">
+    <button id="start">开始</button>
+    <button id="end">结束</button>
+  </div>
+  <div class="note-buttons">
+    <button data-note="C4">C</button>
+    <button data-note="D4">D</button>
+    <button data-note="E4">E</button>
+    <button data-note="F4">F</button>
+    <button data-note="G4">G</button>
+    <button data-note="A4">A</button>
+    <button data-note="B4">B</button>
+  </div>
+
+  <script>
+    // 当前播放的音频对象
+    let currentAudio = null;
+
+    // 音符与文件路径映射
+    const noteMap = {
+      C4: 'sounds/C4.wav',
+      D4: 'sounds/D4.wav',
+      E4: 'sounds/E4.wav',
+      F4: 'sounds/F4.wav',
+      G4: 'sounds/G4.wav',
+      A4: 'sounds/A4.wav',
+      B4: 'sounds/B4.wav'
+    };
+
+    // 播放指定音符
+    function playNote(note) {
+      stopCurrentPlayback(); // 停止当前播放
+      const audio = new Audio(noteMap[note]);
+      audio.play();
+      currentAudio = audio;
+    }
+
+    // 播放完整音频
+    function playCompleteSong() {
+      stopCurrentPlayback(); // 停止当前播放
+      const audio = new Audio('sounds/songs/Tewinkle-Tewinkle-little-Star.mp3');
+      audio.play();
+      currentAudio = audio;
+    }
+
+    // 停止当前播放
+    function stopCurrentPlayback() {
+      if (currentAudio && !currentAudio.paused) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+    }
+
+    // 事件绑定
+    document.getElementById('start').addEventListener('click', () => {
+      stopCurrentPlayback();
+    });
+
+    document.getElementById('end').addEventListener('click', () => {
+      playCompleteSong();
+    });
+
+    document.querySelectorAll('.note-buttons button').forEach(button => {
+      button.addEventListener('click', () => {
+        const note = button.getAttribute('data-note');
+        playNote(note);
+      });
+    });
+  </script>
+</body>
+</html>

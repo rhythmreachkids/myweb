@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>梦幻泡泡音乐游戏 - 进行中</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/myweb/css/game.css">
+</head>
+<body>
+    <!-- 背景泡泡效果 -->
+    <div class="bubbles" id="backgroundBubbles"></div>
+    
+    <div class="container">
+        <div class="game-header">
+            <div class="song-display">
+                <i class="fas fa-music"></i> Playing: <span id="currentSongDisplay">小星星</span>
+            </div>
+            
+            <div class="timer-section">
+                <div class="timer-display">60</div>
+                <div>Remaining（S）</div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                
+                <div class="progress-text">Completion progress：<span id="progressText">0</span>/<span id="totalNotes">8</span></div>
+            </div>
+            
+            <button class="back-button" id="backToHomeBtn">
+                <i class="fas fa-arrow-left"></i> Back home
+            </button>
+        </div>
+        
+        <div class="game-area">
+            <div class="current-note">
+                <i class="fas fa-music"></i> Current note: <span id="currentNoteDisplay">-</span>
+            </div>
+            <canvas id="bubbleCanvas"></canvas>
+            
+            <div class="game-message" id="successMessage">
+                <h2 class="message-title"><i class="fas fa-trophy"></i> Congratulate！</h2>
+                <div class="message-content">You have successfully collected all the notes！</div>
+                <div class="message-content">Full song is playing...</div>
+                <button class="action-button primary-btn" id="playAgainBtn">
+                    <i class="fas fa-redo"></i> Play agian
+                </button>
+                <button class="action-button primary-btn" id="backToHomeBtn2">
+                    <i class="fas fa-home"></i> Back home
+                </button>
+            </div>
+            
+            <div class="game-message" id="timeoutMessage">
+                <h2 class="message-title"><i class="fas fa-clock"></i> Time's up</h2>
+                <div class="message-content">Sorry, the time is up.</div>
+                <div class="message-content">Please try again!</div>
+                <button class="action-button primary-btn" id="retryBtn">
+                    <i class="fas fa-redo"></i> Try again!
+                </button>
+                <button class="action-button primary-btn" id="backToHomeBtn3">
+                    <i class="fas fa-home"></i> Back home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/myweb/js/game.js"></script>
+</body>
+</html>
