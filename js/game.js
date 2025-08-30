@@ -51,8 +51,8 @@ const songNames = {
 // 预设旋律
 const melodies = {
     'twinkle': ['C', 'C', 'G', 'G', 'A', 'A', 'G', 'F', 'F', 'E', 'E', 'D', 'D', 'C'],
-    'moonlight': ['E', 'G', 'G', 'A', 'E', 'C', 'C', 'D', 'E', 'E', 'D', 'C', 'D'],
-    'ode': ['C', 'C', 'C', 'G', 'A', 'A', 'G', 'E', 'E', 'B', 'B', 'C','C', 'C', 'C', 'G', 'A', 'A', 'G', 'E', 'E', 'B', 'B', 'C',],
+    'moonlight': ['E', 'G', 'G', 'A', 'G', 'E', 'C', 'C', 'D', 'E', 'E', 'D', 'C','D','E', 'G', 'G', 'A', 'G', 'E', 'C', 'C', 'D', 'E', 'E', 'D', 'C','D'],
+    'ode': ['C', 'C', 'C', 'C', 'A', 'A', 'G', 'E', 'E', 'D', 'D', 'C','G','C', 'C', 'C', 'C', 'A', 'A', 'G', 'E', 'E', 'D', 'D', 'C','G'],
     'cloud': ['E', 'D', 'C', 'B', 'A', 'C', 'E', 'G','G','B','D','A','C','E','E','G','B','F','A','C'],
 };
 
