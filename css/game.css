@@ -31,8 +31,8 @@ body {
     flex-direction: column;
     align-items: center;
     z-index: 2;
-	transform: scale(0.8);
-	transform-origin: top left; /* 可选：定义缩放的基准点，默认是元素的中心 */
+/* 	transform: scale(0.8);
+	transform-origin: top left; /* 可选：定义缩放的基准点，默认是元素的中心 */ */
 	
 }
 
@@ -296,3 +296,4 @@ body {
         font-size: 1.2rem;
     }
 }
+
