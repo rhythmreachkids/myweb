@@ -37,7 +37,7 @@ const songAudioFiles = {
     'twinkle': 'js/sounds/songs/Tewinkle-Tewinkle-little-Star.mp3',
     'moonlight': 'js/sounds/songs/MIXUE-Ice-Cream-&-Tea-Song.mp3',
     'ode': 'js/sounds/songs/Old-MacDonald-Had-a-Farm.mp3',
-    'cloud': 'js/sounds/songs/Canon-in-D.mp3'
+    'cloud': 'js/sounds/songs/ODE-TO-JOY.mp3'
 };
 
 // 乐曲名称映射
@@ -45,7 +45,7 @@ const songNames = {
     'twinkle': 'Tewinkle-Tewinkle-little-Star',
     'moonlight': 'MIXUE-Ice-Cream-&-Tea-Song',
     'ode': 'Old-MacDonald-Had-a-Farm',
-    'cloud': 'Canon-in-D'
+    'cloud': 'ODE-TO-JOY'
 };
 
 // 预设旋律
@@ -53,7 +53,7 @@ const melodies = {
     'twinkle': ['C', 'C', 'G', 'G', 'A', 'A', 'G', 'F', 'F', 'E', 'E', 'D', 'D', 'C'],
     'moonlight': ['E', 'G', 'G', 'A', 'G', 'E', 'C', 'C', 'D', 'E', 'E', 'D', 'C','D','E', 'G', 'G', 'A', 'G', 'E', 'C', 'C', 'D', 'E', 'E', 'D', 'C','D'],
     'ode': ['C', 'C', 'C', 'C', 'A', 'A', 'G', 'E', 'E', 'D', 'D', 'C','G','C', 'C', 'C', 'C', 'A', 'A', 'G', 'E', 'E', 'D', 'D', 'C','G'],
-    'cloud': ['E', 'D', 'C', 'B', 'A', 'C', 'E', 'G','G','B','D','A','C','E','E','G','B','F','A','C'],
+    'cloud': ['E', 'E', 'F', 'F', 'G', 'G', 'F', 'E','D','C','C','D','E','E','D','D','E', 'E', 'F', 'F', 'G', 'G', 'F', 'E','D','C','C','D','E','D','C','C'],
 };
 
 // 游戏状态
