@@ -39,10 +39,10 @@ const songNames = {
 
 // 每首歌曲的音符切片数量
 const songNoteCounts = {
-    'twinkle': 25,
-    'moonlight':25,
-    'ode': 24,
-    'cloud': 27
+    'twinkle': 28,
+    'moonlight':27,
+    'ode': 25,
+    'cloud': 29
 };
 
 // 游戏状态
