@@ -21,20 +21,9 @@ function createBackgroundBubbles() {
     }
 }
 
-// 音符到音频文件的映射
-const noteAudioFiles = {
-    'C': 'js/sounds/C4.mp3',
-    'D': 'js/sounds/D4.mp3',
-    'E': 'js/sounds/E4.mp3',
-    'F': 'js/sounds/F4.mp3',
-    'G': 'js/sounds/G4.mp3',
-    'A': 'js/sounds/A4.mp3',
-    'B': 'js/sounds/B4.mp3'
-};
-
-// 乐曲到音频文件的映射
+// 乐曲到音频文件的映射 (完整乐曲)
 const songAudioFiles = {
-    'twinkle': 'js/sounds/songs/Tewinkle-Tewinkle-little-Star.mp3',
+    // 'twinkle': 'js/sounds/songs/Tewinkle-Tewinkle-little-Star.mp3',
     'moonlight': 'js/sounds/songs/MIXUE-Ice-Cream-&-Tea-Song.mp3',
     'ode': 'js/sounds/songs/Old-MacDonald-Had-a-Farm.mp3',
     'cloud': 'js/sounds/songs/ODE-TO-JOY.mp3'
@@ -42,25 +31,25 @@ const songAudioFiles = {
 
 // 乐曲名称映射
 const songNames = {
-    'twinkle': 'Tewinkle-Tewinkle-little-Star',
+    // 'twinkle': 'Tewinkle-Tewinkle-little-Star',
     'moonlight': 'MIXUE-Ice-Cream-&-Tea-Song',
     'ode': 'Old-MacDonald-Had-a-Farm',
     'cloud': 'ODE-TO-JOY'
 };
 
-// 预设旋律
-const melodies = {
-    'twinkle': ['C', 'C', 'G', 'G', 'A', 'A', 'G', 'F', 'F', 'E', 'E', 'D', 'D', 'C'],
-    'moonlight': ['E', 'G', 'G', 'A', 'G', 'E', 'C', 'C', 'D', 'E', 'E', 'D', 'C','D','E', 'G', 'G', 'A', 'G', 'E', 'C', 'C', 'D', 'E', 'E', 'D', 'C','D'],
-    'ode': ['C', 'C', 'C', 'C', 'A', 'A', 'G', 'E', 'E', 'D', 'D', 'C','G','C', 'C', 'C', 'C', 'A', 'A', 'G', 'E', 'E', 'D', 'D', 'C','G'],
-    'cloud': ['E', 'E', 'F', 'F', 'G', 'G', 'F', 'E','D','C','C','D','E','E','D','D','E', 'E', 'F', 'F', 'G', 'G', 'F', 'E','D','C','C','D','E','D','C','C'],
+// 每首歌曲的音符切片数量
+const songNoteCounts = {
+    // 'twinkle': 25,
+    'moonlight':25,
+    'ode': 24,
+    'cloud': 27
 };
 
 // 游戏状态
 const gameState = {
     bubbles: [],
     activeBubbleIndex: -1,
-    currentMelody: [],
+    currentMelody: [], // 这里将存储当前歌曲的音符索引序列
     currentNoteIndex: 0,
     gameStarted: false,
     gameOver: false,
@@ -68,9 +57,10 @@ const gameState = {
     timerInterval: null,
     currentSong: 'twinkle',
     audioContext: null,
-    noteBuffers: {},
-    songBuffer: null,
-    activeSources: [] // 存储当前活跃的音频源，用于停止播放
+    noteBuffers: {}, // 存储加载的音符切片音频
+    songBuffer: null, // 存储完整乐曲音频
+    activeSources: [], // 存储当前活跃的音频源，用于停止播放
+    totalNotesInSong: 0 // 当前歌曲的总音符数
 };
 
 // 初始化Canvas
@@ -86,19 +76,25 @@ function resizeCanvas() {
 // 创建泡泡
 function createBubbles() {
     gameState.bubbles = [];
-    const melody = melodies[gameState.currentSong];
-    
+    gameState.totalNotesInSong = songNoteCounts[gameState.currentSong] || 14; // 默认14个音符
+    gameState.currentMelody = []; // 重置当前旋律
+
+    // 生成当前歌曲的音符索引序列 (1 到 totalNotesInSong)
+    for (let i = 1; i <= gameState.totalNotesInSong; i++) {
+        gameState.currentMelody.push(i);
+    }
+
     // 确保每个音符至少有一个泡泡
-    for (let i = 0; i < melody.length; i++) {
+    for (let i = 0; i < gameState.currentMelody.length; i++) {
         const radius = Math.random() * 40 + 30;
         const x = Math.random() * (canvas.width - radius * 2) + radius;
         const y = Math.random() * (canvas.height - radius * 2) + radius;
         
-        const note = melody[i];
+        const noteIndex = gameState.currentMelody[i]; // 音符索引
         
         gameState.bubbles.push({
             x, y, radius,
-            note: note,
+            noteIndex: noteIndex, // 存储音符索引而不是字母
             color: '#aaaaaa', // 默认灰色
             active: false,
             collected: false,
@@ -108,20 +104,20 @@ function createBubbles() {
     }
     
     // 添加额外的泡泡，总数为20个
-    const extraBubbleCount = Math.max(1, 20 - melody.length);
+    const extraBubbleCount = Math.max(1, 20 - gameState.currentMelody.length);
     
     for (let i = 0; i < extraBubbleCount; i++) {
         const radius = Math.random() * 40 + 30;
         const x = Math.random() * (canvas.width - radius * 2) + radius;
         const y = Math.random() * (canvas.height - radius * 2) + radius;
         
-        // 随机分配旋律中的音符
-        const noteIndex = Math.floor(Math.random() * melody.length);
-        const note = melody[noteIndex];
+        // 随机分配旋律中的音符索引
+        const noteIndexIndex = Math.floor(Math.random() * gameState.currentMelody.length);
+        const noteIndex = gameState.currentMelody[noteIndexIndex]; // 获取音符索引
         
         gameState.bubbles.push({
             x, y, radius,
-            note: note,
+            noteIndex: noteIndex,
             color: '#aaaaaa', // 默认灰色
             active: false,
             collected: false,
@@ -134,11 +130,11 @@ function createBubbles() {
     activateNextBubble();
 }
 
-// 为特定音符创建新泡泡
-function createNewBubbleForNote(note) {
-    // 检查音符是否有效
-    if (!note) {
-        console.warn('尝试为未定义的音符创建泡泡');
+// 为特定音符索引创建新泡泡
+function createNewBubbleForNote(noteIndex) {
+    // 检查音符索引是否有效
+    if (noteIndex === undefined || noteIndex === null) {
+        console.warn('尝试为未定义的音符索引创建泡泡');
         return;
     }
     
@@ -148,8 +144,8 @@ function createNewBubbleForNote(note) {
     
     const newBubble = {
         x, y, radius,
-        note: note,
-        color: getBubbleColor(note),
+        noteIndex: noteIndex,
+        color: getBubbleColor(noteIndex),
         active: true,
         collected: false,
         vx: (Math.random() - 0.5) * 0.8,
@@ -159,8 +155,8 @@ function createNewBubbleForNote(note) {
     gameState.bubbles.push(newBubble);
     gameState.activeBubbleIndex = gameState.bubbles.length - 1;
     
-    // 更新当前音符显示
-    document.getElementById('currentNoteDisplay').textContent = note;
+    // 更新当前音符显示 (显示索引)
+    document.getElementById('currentNoteDisplay').textContent = noteIndex;
 }
 
 // 按照旋律顺序激活下一个泡泡
@@ -171,18 +167,18 @@ function activateNextBubble() {
         bubble.color = '#aaaaaa';
     });
     
-    // 获取当前应该激活的音符
-    const currentNote = gameState.currentMelody[gameState.currentNoteIndex];
+    // 获取当前应该激活的音符索引
+    const currentNoteIndexValue = gameState.currentMelody[gameState.currentNoteIndex];
     
-    // 检查当前音符是否有效
-    if (!currentNote) {
-        console.warn('当前音符未定义，可能是旋律数据有误');
+    // 检查当前音符索引是否有效
+    if (currentNoteIndexValue === undefined) {
+        console.warn('当前音符索引未定义，可能是旋律数据有误');
         document.getElementById('currentNoteDisplay').textContent = '-';
         return;
     }
     
-    // 从未收集的泡泡中找到匹配当前音符的泡泡
-    const availableBubbles = gameState.bubbles.filter(b => !b.collected && b.note === currentNote);
+    // 从未收集的泡泡中找到匹配当前音符索引的泡泡
+    const availableBubbles = gameState.bubbles.filter(b => !b.collected && b.noteIndex === currentNoteIndexValue);
     
     if (availableBubbles.length > 0) {
         // 如果有匹配的泡泡，随机选择一个（可能有多个相同音符的泡泡）
@@ -190,36 +186,32 @@ function activateNextBubble() {
         const bubble = availableBubbles[randomIndex];
         
         bubble.active = true;
-        bubble.color = getBubbleColor(bubble.note);
+        bubble.color = getBubbleColor(bubble.noteIndex);
         gameState.activeBubbleIndex = gameState.bubbles.indexOf(bubble);
         
-        // 更新当前音符显示
-        document.getElementById('currentNoteDisplay').textContent = bubble.note;
+        // 更新当前音符显示 (显示索引)
+        document.getElementById('currentNoteDisplay').textContent = bubble.noteIndex;
     } else {
         // 如果没有匹配的泡泡（可能已经全部收集），创建一个新的泡泡
-        createNewBubbleForNote(currentNote);
+        createNewBubbleForNote(currentNoteIndexValue);
     }
 }
 
-// 根据音符获取泡泡颜色
-function getBubbleColor(note) {
-    // 检查音符是否有效
-    if (!note) {
-        console.warn('尝试获取未定义音符的颜色');
-        return '#CCCCCC'; // 灰色作为默认颜色
-    }
+// 根据音符索引获取泡泡颜色
+function getBubbleColor(noteIndex) {
+    // 使用模运算来循环分配颜色，确保即使音符很多也能有颜色
+    const colors = [
+        '#FF5252', // 红色 0
+        '#FFEB3B', // 黄色 1
+        '#4CAF50', // 绿色 2
+        '#2196F3', // 蓝色 3
+        '#9C27B0', // 紫色 4
+        '#FF9800', // 橙色 5
+        '#00BCD4'  // 青色 6
+    ];
     
-    const colors = {
-        'C': '#FF5252', // 红色
-        'D': '#FFEB3B', // 黄色
-        'E': '#4CAF50', // 绿色
-        'F': '#2196F3', // 蓝色
-        'G': '#9C27B0', // 紫色
-        'A': '#FF9800', // 橙色
-        'B': '#00BCD4'  // 青色
-    };
-    
-    return colors[note] || '#FF5252';
+    const colorIndex = (noteIndex - 1) % colors.length; // 索引从1开始，所以减1
+    return colors[colorIndex] || '#FF5252';
 }
 
 // 绘制泡泡
@@ -257,12 +249,12 @@ function drawBubbles() {
         ctx.lineWidth = 2;
         ctx.stroke();
         
-        // 绘制音符
+        // 绘制音符索引
         ctx.font = `${bubble.radius * 1}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = 'white';
-        ctx.fillText(bubble.note, bubble.x, bubble.y);
+        ctx.fillText(bubble.noteIndex.toString(), bubble.x, bubble.y);
     });
 }
 
@@ -288,13 +280,8 @@ function updateBubbles() {
 // 检查文件是否存在
 async function checkFileExists(url) {
     try {
-        // 使用 GET 请求代替 HEAD 请求，并只请求文件的前几个字节
-        // 这样可以避免某些服务器不支持 HEAD 请求或 CORS 限制的问题
         const response = await fetch(url, { 
-            method: 'GET',
-            headers: {
-                'Range': 'bytes=0-1' // 只请求前两个字节，减少数据传输
-            }
+            method: 'HEAD' // 使用 HEAD 请求检查文件是否存在
         });
         return response.ok;
     } catch (error) {
@@ -308,31 +295,35 @@ async function loadAudioFiles() {
     try {
         console.log('开始加载音频文件...');
         
-        // 加载音符音频
-        for (const note in noteAudioFiles) {
+        // 清空之前的音符缓冲区
+        gameState.noteBuffers = {};
+        
+        // 加载当前歌曲的音符切片音频 (根据索引)
+        const totalNotes = gameState.totalNotesInSong;
+        for (let i = 1; i <= totalNotes; i++) {
             try {
-                // 尝试加载MP3文件
-                let audioPath = noteAudioFiles[note];
-                console.log(`正在加载音符 ${note} 的音频: ${audioPath}`);
+                // 构造音符切片文件路径
+                let audioPath = `js/sounds/${gameState.currentSong}/${i}.mp3`;
+                console.log(`正在加载歌曲 ${gameState.currentSong} 的音符切片 ${i}: ${audioPath}`);
                 
                 // 检查MP3文件是否存在
                 let exists = await checkFileExists(audioPath);
                 
                 // 如果MP3文件不存在，尝试加载WAV文件
                 if (!exists) {
-                    console.warn(`音符 ${note} 的MP3文件不存在: ${audioPath}`);
+                    console.warn(`音符切片 ${i} 的MP3文件不存在: ${audioPath}`);
                     // 尝试使用WAV格式
-                    audioPath = audioPath.replace('.mp3', '.wav');
+                    audioPath = `js/sounds/${gameState.currentSong}/${i}.wav`;
                     console.log(`尝试加载WAV格式: ${audioPath}`);
                     exists = await checkFileExists(audioPath);
                     
                     if (!exists) {
-                        console.warn(`音符 ${note} 的WAV文件也不存在: ${audioPath}`);
-                        continue;
+                        console.warn(`音符切片 ${i} 的WAV文件也不存在: ${audioPath}`);
+                        continue; // 跳过这个音符
                     }
                 }
                 
-                // 尝试加载文件
+                // // 尝试加载文件
                 try {
                     const response = await fetch(audioPath);
                     if (!response.ok) {
@@ -340,10 +331,10 @@ async function loadAudioFiles() {
                     }
                     const arrayBuffer = await response.arrayBuffer();
                     const audioBuffer = await gameState.audioContext.decodeAudioData(arrayBuffer);
-                    gameState.noteBuffers[note] = audioBuffer;
-                    console.log(`音符 ${note} 的音频加载成功`);
+                    gameState.noteBuffers[i] = audioBuffer; // 使用索引作为键
+                    console.log(`音符切片 ${i} 的音频加载成功`);
                 } catch (fetchError) {
-                    console.error(`获取音符 ${note} 的音频文件时出错:`, fetchError);
+                    console.error(`获取音符切片 ${i} 的音频文件时出错:`, fetchError);
                     // 如果是MP3格式失败，尝试WAV格式
                     if (audioPath.endsWith('.mp3')) {
                         const wavPath = audioPath.replace('.mp3', '.wav');
@@ -353,43 +344,47 @@ async function loadAudioFiles() {
                             if (wavResponse.ok) {
                                 const wavArrayBuffer = await wavResponse.arrayBuffer();
                                 const wavAudioBuffer = await gameState.audioContext.decodeAudioData(wavArrayBuffer);
-                                gameState.noteBuffers[note] = wavAudioBuffer;
-                                console.log(`音符 ${note} 的WAV音频加载成功`);
+                                gameState.noteBuffers[i] = wavAudioBuffer; // 使用索引作为键
+                                console.log(`音符切片 ${i} 的WAV音频加载成功`);
                             }
                         } catch (wavError) {
-                            console.error(`加载音符 ${note} 的WAV音频时出错:`, wavError);
+                            console.error(`加载音符切片 ${i} 的WAV音频时出错:`, wavError);
                         }
                     }
                 }
             } catch (noteError) {
-                console.error(`加载音符 ${note} 的音频时出错:`, noteError);
+                console.error(`加载音符切片 ${i} 的音频时出错:`, noteError);
             }
         }
         
-        // 加载当前歌曲音频
+        // 加载当前歌曲的完整音频
         try {
             const songPath = songAudioFiles[gameState.currentSong];
-            console.log(`正在加载歌曲音频: ${songPath}`);
-            
-            // 检查文件是否存在
-            const exists = await checkFileExists(songPath);
-            if (!exists) {
-                console.warn(`歌曲音频文件不存在: ${songPath}`);
-            } else {
-                try {
-                    const songResponse = await fetch(songPath);
-                    if (!songResponse.ok) {
-                        throw new Error(`HTTP error! status: ${songResponse.status}`);
+            if (songPath) {
+                console.log(`正在加载歌曲完整音频: ${songPath}`);
+                
+                // 检查文件是否存在
+                const exists = await checkFileExists(songPath);
+                if (!exists) {
+                    console.warn(`歌曲完整音频文件不存在: ${songPath}`);
+                } else {
+                    try {
+                        const songResponse = await fetch(songPath);
+                        if (!songResponse.ok) {
+                            throw new Error(`HTTP error! status: ${songResponse.status}`);
+                        }
+                        const songArrayBuffer = await songResponse.arrayBuffer();
+                        gameState.songBuffer = await gameState.audioContext.decodeAudioData(songArrayBuffer);
+                        console.log('歌曲完整音频加载成功');
+                    } catch (fetchError) {
+                        console.error('获取歌曲完整音频文件时出错:', fetchError);
                     }
-                    const songArrayBuffer = await songResponse.arrayBuffer();
-                    gameState.songBuffer = await gameState.audioContext.decodeAudioData(songArrayBuffer);
-                    console.log('歌曲音频加载成功');
-                } catch (fetchError) {
-                    console.error('获取歌曲音频文件时出错:', fetchError);
                 }
+            } else {
+                 console.warn(`未找到歌曲 "${gameState.currentSong}" 的完整音频路径`);
             }
         } catch (songError) {
-            console.error('加载歌曲音频时出错:', songError);
+            console.error('加载歌曲完整音频时出错:', songError);
         }
         
         console.log('所有音频文件加载完成');
@@ -398,15 +393,17 @@ async function loadAudioFiles() {
     }
 }
 
-// 播放音符
-function playNote(note) {
-    if (!gameState.noteBuffers[note]) {
-        console.warn(`音符 ${note} 的音频未加载`);
+// 播放音符 (根据索引播放)
+function playNote(noteIndex) {
+    // 确保 noteIndex 是数字
+    const index = Number(noteIndex);
+    if (isNaN(index) || !gameState.noteBuffers[index]) {
+        console.warn(`音符切片 ${noteIndex} 的音频未加载或无效`);
         return;
     }
     
     const source = gameState.audioContext.createBufferSource();
-    source.buffer = gameState.noteBuffers[note];
+    source.buffer = gameState.noteBuffers[index];
     source.connect(gameState.audioContext.destination);
     source.start();
     
@@ -425,7 +422,7 @@ function playNote(note) {
 // 播放完整旋律
 function playMelody() {
     if (!gameState.songBuffer) {
-        console.warn('歌曲音频未加载');
+        console.warn('歌曲完整音频未加载');
         return;
     }
     
@@ -492,7 +489,11 @@ async function startGame() {
     
     try {
         // 初始化Web Audio API
-        gameState.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        if (!gameState.audioContext) {
+            gameState.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } else if (gameState.audioContext.state === 'suspended') {
+             await gameState.audioContext.resume();
+        }
         
         // 加载音频文件
         await loadAudioFiles();
@@ -501,7 +502,7 @@ async function startGame() {
         const hasLoadedNotes = Object.keys(gameState.noteBuffers).length > 0;
         
         if (!hasLoadedNotes) {
-            throw new Error('没有成功加载任何音符音频文件');
+            throw new Error('没有成功加载任何音符切片音频文件');
         }
         
         gameState.gameStarted = true;
@@ -509,18 +510,8 @@ async function startGame() {
         gameState.timer = 60;
         gameState.currentNoteIndex = 0;
         
-        // 获取当前歌曲的旋律
-        gameState.currentMelody = melodies[gameState.currentSong];
-        
-        // 检查当前歌曲是否存在于预设旋律中
-        if (!gameState.currentMelody) {
-            console.warn(`歌曲 "${gameState.currentSong}" 不存在于预设旋律中，使用默认歌曲`);
-            gameState.currentSong = 'twinkle';
-            gameState.currentMelody = melodies['twinkle'];
-            
-            // 更新显示的歌曲名称
-            document.getElementById('currentSongDisplay').textContent = songNames['twinkle'] || '小星星';
-        }
+        // 获取当前歌曲的总音符数
+        gameState.totalNotesInSong = songNoteCounts[gameState.currentSong] || 14;
         
         // 更新进度显示
         document.getElementById('progressText').textContent = gameState.currentNoteIndex;
@@ -532,7 +523,7 @@ async function startGame() {
         });
         
         // 更新总音符数
-        document.getElementById('totalNotes').textContent = gameState.currentMelody.length;
+        document.getElementById('totalNotes').textContent = gameState.totalNotesInSong;
         
         // 重置进度
         document.getElementById('progressText').textContent = '0';
@@ -638,8 +629,8 @@ function handleBubbleClick(event) {
         );
         
         if (distance <= bubble.radius && bubble.active) {
-            // 播放音符
-            playNote(bubble.note);
+            // 播放音符 (传递音符索引)
+            playNote(bubble.noteIndex);
             
             // 标记为已收集
             bubble.collected = true;
@@ -649,11 +640,11 @@ function handleBubbleClick(event) {
             document.getElementById('progressText').textContent = gameState.currentNoteIndex;
             
             // 更新进度条
-            const progressPercentage = (gameState.currentNoteIndex / gameState.currentMelody.length) * 100;
+            const progressPercentage = (gameState.currentNoteIndex / gameState.totalNotesInSong) * 100;
             document.getElementById('progressBar').style.width = `${progressPercentage}%`;
             
             // 检查是否完成
-            if (gameState.currentNoteIndex >= gameState.currentMelody.length) {
+            if (gameState.currentNoteIndex >= gameState.totalNotesInSong) {
                 endGame(true);
             } else {
                 // 激活下一个泡泡
@@ -697,27 +688,6 @@ function backToHome() {
     window.location.href = 'index.html';
 }
 
-// 检查并修复文件路径中的重复扩展名
-function fixDuplicateExtensions() {
-    // 修复音符音频文件路径
-    for (const note in noteAudioFiles) {
-        const path = noteAudioFiles[note];
-        if (path.endsWith('.mp3.mp3')) {
-            noteAudioFiles[note] = path.replace('.mp3.mp3', '.mp3');
-            console.log(`修复了音符 ${note} 的音频文件路径: ${noteAudioFiles[note]}`);
-        }
-    }
-    
-    // 修复歌曲音频文件路径
-    for (const song in songAudioFiles) {
-        const path = songAudioFiles[song];
-        if (path.endsWith('.mp3.mp3')) {
-            songAudioFiles[song] = path.replace('.mp3.mp3', '.mp3');
-            console.log(`修复了歌曲 ${song} 的音频文件路径: ${songAudioFiles[song]}`);
-        }
-    }
-}
-
 // 页面加载完成后执行
 document.addEventListener('DOMContentLoaded', function() {
     // 创建背景泡泡
@@ -748,12 +718,12 @@ document.addEventListener('DOMContentLoaded', function() {
         startGame();
     });
     
-    // 检查并修复文件路径
-    fixDuplicateExtensions();
-    
     // 开始游戏
     startGame();
     
     // 开始动画
     animate();
 });
+
+
+
