@@ -23,16 +23,16 @@ function createBackgroundBubbles() {
 
 // 乐曲到音频文件的映射 (完整乐曲)
 const songAudioFiles = {
-    'twinkle': 'js/sounds/songs/Tewinkle-Tewinkle-little-Star.mp3',
-    'moonlight': 'js/sounds/songs/MIXUE-Ice-Cream-&-Tea-Song.mp3',
+    'twinkle': 'js/sounds/songs/Twinkle-twinkle-little-star.mp3',
+    'moonlight': 'js/sounds/songs/Vigny-&-Forkyrie-Bootleg.mp3',
     'ode': 'js/sounds/songs/Old-MacDonald-Had-a-Farm.mp3',
     'cloud': 'js/sounds/songs/ODE-TO-JOY.mp3'
 };
 
 // 乐曲名称映射
 const songNames = {
-    'twinkle': 'Tewinkle-Tewinkle-little-Star',
-    'moonlight': 'MIXUE-Ice-Cream-&-Tea-Song',
+    'twinkle': 'Twinkle-twinkle-little-star',
+    'moonlight': 'Vigny-&-Forkyrie-Bootleg',
     'ode': 'Old-MacDonald-Had-a-Farm',
     'cloud': 'ODE-TO-JOY'
 };
